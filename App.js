@@ -5,31 +5,56 @@ import { StyleSheet, Text, View, ActivityIndicator, Image } from 'react-native';
 const App = () => {
   const [poke, setPoke] = useState([]);
 
+  const fetchPokemon = async () => {
+    const firstFetch = await fetch('https://pokeapi.co/api/v2/pokemon?limit=5');
+    const firstPromise = await firstFetch.json();
+
+    const secondFetch = firstPromise.results.map(async (item) => {
+      const fetchEachPokemon = await fetch(item.url);
+      return fetchEachPokemon.json();
+    });
+
+    const allPokemon = (await Promise.all(secondFetch)).map((pokemon) => ({
+      id: pokemon.id,
+      name: pokemon.name,
+      image: pokemon.sprites['front_default'],
+      moves: pokemon.moves.slice(0, 5),
+    }));
+
+    setPoke(allPokemon);
+  };
+
   useEffect(() => {
-    fetch('https://pokeapi.co/api/v2/pokemon?limit=5')
-      .then((resp) => resp.json())
-      .then((data) => {
-        let pokemon = data.results;
-        setPoke(pokemon);
-      });
+    fetchPokemon();
   }, []);
 
   return (
-    <View style={styles.container}>
+    <View testID='pokemon' style={styles.container}>
       <h1>Here are the first five pokemon!</h1>
       {poke.length ? (
         <View>
           {poke.map((mon) => (
-            <View style={styles.card} key={mon.name}>
+            <View style={styles.card} key={mon.id}>
               <Text>
                 <h2>{mon.name}</h2>
+                <h3>PokeDex: {mon.id}</h3>
               </Text>
+              {console.log(poke)}
               <Image
                 style={styles.image}
                 source={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${
                   poke.indexOf(mon) + 1
                 }.png`}
               />
+              <Text>
+                <b>Moves:</b>
+                <ul>
+                  <li>{mon.moves[0].move.name}</li>
+                  <li>{mon.moves[1].move.name}</li>
+                  <li>{mon.moves[2].move.name}</li>
+                  <li>{mon.moves[3].move.name}</li>
+                </ul>
+              </Text>
             </View>
           ))}
         </View>
@@ -44,21 +69,22 @@ const App = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    border: '10px solid',
+    borderWidth: 10,
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
   },
   image: {
-    width: 50,
-    height: 50,
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: 100,
+    height: 100,
   },
   card: {
-    border: '1px solid',
+    borderWidth: 1,
     borderColor: 'black',
-    margin: '1px',
+    margin: '1rem',
+    width: '60vw',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 
