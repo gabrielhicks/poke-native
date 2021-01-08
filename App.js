@@ -39,13 +39,7 @@ const App = () => {
                 <h2>{mon.name}</h2>
                 <h3>PokeDex: {mon.id}</h3>
               </Text>
-              {console.log(poke)}
-              <Image
-                style={styles.image}
-                source={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${
-                  poke.indexOf(mon) + 1
-                }.png`}
-              />
+              <Image style={styles.image} source={mon.image} />
               <Text>
                 <b>Moves:</b>
                 <ul>
@@ -59,7 +53,10 @@ const App = () => {
           ))}
         </View>
       ) : (
-        <ActivityIndicator size='large' color='#00ff00' />
+        <View>
+          <ActivityIndicator size='large' color='#00ff00' />
+          <Text>Loading</Text>
+        </View>
       )}
       <StatusBar style='auto' />
     </View>
